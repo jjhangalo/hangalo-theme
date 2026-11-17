@@ -36,4 +36,13 @@ _simple_git_info() {
     print -n "$out"
 }
 
-PROMPT='%(?..%F{red}(%?)%f )%B%F{green}%n@%m%f%b %F{cyan}%1~%f $(_simple_git_info)>'$'\n''$ '
+# Built by a function on purpose: a literal "(" inside %(?..) ends the condition
+# early in zsh's prompt parser and leaks a stray ") " into the prompt.
+_simple_git_exit_code() {
+    local code=$?
+    (( code )) || return 0
+    print -rn -- "%F{red}(${code})%f "
+    return 0
+}
+
+PROMPT='$(_simple_git_exit_code)%B%F{green}%n@%m%f%b %F{cyan}%1~%f $(_simple_git_info)>'$'\n''$ '
